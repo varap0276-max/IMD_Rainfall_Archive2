@@ -1,6 +1,6 @@
 import os
 import requests
-
+from git_utils import git_update
 from datetime import datetime
 
 from config import *
@@ -89,9 +89,9 @@ def download_pdf():
 
 
 # ==========================================================
+# ==========================================================
 # Main
 # ==========================================================
-
 def main():
 
     print()
@@ -100,22 +100,22 @@ def main():
     print("=" * 60)
 
     # ------------------------------------------------------
-    # Create Project Folders
+    # Create project folders
     # ------------------------------------------------------
     create_project_folders()
 
     # ------------------------------------------------------
-    # Create Database
+    # Create database
     # ------------------------------------------------------
     create_database()
 
     # ------------------------------------------------------
-    # Download Today's PDF
+    # Download today's PDF
     # ------------------------------------------------------
     pdf_path = download_pdf()
 
     # ------------------------------------------------------
-    # Read Complete PDF
+    # Read complete PDF
     # ------------------------------------------------------
     print()
     print("Reading PDF...")
@@ -123,7 +123,7 @@ def main():
     text = read_complete_pdf(pdf_path)
 
     # ------------------------------------------------------
-    # Extract Report Date
+    # Extract report date
     # ------------------------------------------------------
     report_date = extract_report_date(text)
 
@@ -131,7 +131,7 @@ def main():
     print("Report Date :", report_date)
 
     # ------------------------------------------------------
-    # Save Raw Text
+    # Save extracted text
     # ------------------------------------------------------
     txt_filename = report_date + ".txt"
 
@@ -145,7 +145,7 @@ def main():
     print(txt_path)
 
     # ------------------------------------------------------
-    # Split into Lines
+    # Split text into lines
     # ------------------------------------------------------
     lines = split_lines(text)
 
@@ -153,17 +153,14 @@ def main():
     print("Total Lines :", len(lines))
 
     # ------------------------------------------------------
-    # Debug Line Classification
+    # Inspect line types
     # ------------------------------------------------------
     inspect_lines(lines)
 
     # ------------------------------------------------------
-    # Extract Structured Records
+    # Extract all records
     # ------------------------------------------------------
     records = extract_district_records(lines)
-
-    print()
-    print("Total Records Extracted :", len(records))
 
     # ------------------------------------------------------
     # Save CSV
@@ -179,7 +176,7 @@ def main():
     print(csv_path)
 
     # ------------------------------------------------------
-    # Update Download Log
+    # Update database
     # ------------------------------------------------------
     add_log(
         download_date=datetime.now().strftime("%Y-%m-%d"),
@@ -191,6 +188,11 @@ def main():
     print()
     print("Database Updated.")
 
+    # ------------------------------------------------------
+    # Upload to GitHub
+    # ------------------------------------------------------
+    git_update(report_date)
+
     print()
     print("=" * 60)
     print("PROGRAM COMPLETED SUCCESSFULLY")
@@ -200,6 +202,5 @@ def main():
 # ==========================================================
 # Program Entry
 # ==========================================================
-
 if __name__ == "__main__":
     main()
