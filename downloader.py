@@ -2,6 +2,8 @@ import os
 import requests
 from git_utils import git_update
 from datetime import datetime
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
 from config import *
 
@@ -47,6 +49,38 @@ def validate_pdf(response):
     if not response.content.startswith(b"%PDF"):
 
         raise Exception("Invalid PDF file.")
+    
+# ==========================================================
+# Get Latest PDF URL from IMD Website
+# ==========================================================
+
+def get_latest_pdf_url():
+
+    print()
+    print("=" * 60)
+    print("LOCATING LATEST PDF")
+    print("=" * 60)
+
+    response = requests.get(IMD_PAGE_URL)
+
+    if response.status_code != 200:
+        raise Exception("Unable to open IMD webpage.")
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    pdf_button = soup.find("a", id="default-block-btn")
+
+    if pdf_button is None:
+        raise Exception("Download button not found.")
+
+    pdf_href = pdf_button.get("href")
+
+    pdf_url = urljoin(IMD_PAGE_URL, pdf_href)
+
+    print("Latest PDF URL Found:")
+    print(pdf_url)
+
+    return pdf_url
 
 
 # ==========================================================
@@ -57,7 +91,9 @@ def download_pdf():
 
     print("\nConnecting to IMD...")
 
-    response = requests.get(PDF_URL, timeout=60)
+    pdf_url = get_latest_pdf_url()
+
+    response = requests.get(pdf_url)
 
     response.raise_for_status()
 
