@@ -8,13 +8,6 @@ Configuration File
 import os
 
 # -------------------------------------------------------
-# IMD URL
-# -------------------------------------------------------
-
-PDF_URL = (
-    "https://mausam.imd.gov.in/Rainfall/"
-    "DISTRICT_RAINFALL_DISTRIBUTION_COUNTRY_INDIA_cd.pdf"
-)
 
 # -------------------------------------------------------
 # Project Root
@@ -42,7 +35,6 @@ TEMP_FOLDER = os.path.join(ARCHIVE_FOLDER, "temp")
 
 LOG_FILE = os.path.join(LOG_FOLDER, "download_log.csv")
 
-TEMP_FOLDER = os.path.join(BASE_DIR, "archive", "temp")
 # ==========================================================
 # IMD Rainfall Statistics Page
 # ==========================================================

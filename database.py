@@ -43,3 +43,23 @@ def add_log(download_date,
             filename,
             status
         ])
+
+# ==========================================================
+# Get Last Archived Report
+# ==========================================================
+
+def get_last_report_date():
+
+    if not os.path.exists(LOG_FILE):
+        return None
+
+    with open(LOG_FILE, "r", encoding="utf-8") as file:
+
+        rows = file.readlines()
+
+    if len(rows) <= 1:
+        return None
+
+    last_row = rows[-1].strip().split(",")
+
+    return last_row[1]

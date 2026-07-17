@@ -15,8 +15,11 @@ from parser import (
     extract_district_records,
     save_records_csv
 )
-from database import create_database
-from database import add_log
+from database import (
+    create_database,
+    add_log,
+    get_last_report_date
+)
 
 
 # ==========================================================
@@ -165,6 +168,11 @@ def main():
 
     print()
     print("Report Date :", report_date)
+    print()
+
+    last_report = get_last_report_date()
+
+    print("Last Archived Report :", last_report)
 
     # ------------------------------------------------------
     # Save extracted text
