@@ -19,6 +19,8 @@ def run_git(command):
     if result.stderr:
         print(result.stderr)
 
+    return result.returncode
+
 
 # ==========================================================
 # Git Add
@@ -43,7 +45,7 @@ def git_commit(message):
     print("GIT COMMIT")
     print("=" * 60)
 
-    run_git(f'git commit -m "{message}"')
+    return run_git(f'git commit -m "{message}"')
 
 
 # ==========================================================
@@ -66,6 +68,11 @@ def git_update(report_date):
 
     git_add()
 
-    git_commit(f"Daily IMD Update - {report_date}")
+    status = git_commit(f"Daily IMD Update - {report_date}")
 
-    git_push()
+    if status == 0:
+        git_push()
+
+    else:
+        print()
+        print("No new Git commit created.")
