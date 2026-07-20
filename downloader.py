@@ -131,6 +131,9 @@ def download_pdf():
 # ==========================================================
 # Main
 # ==========================================================
+# Main
+# ==========================================================
+
 def main():
 
     print()
@@ -139,44 +142,67 @@ def main():
     print("=" * 60)
 
     # ------------------------------------------------------
-    # Create project folders
+    # Create folders and database
     # ------------------------------------------------------
+
     create_project_folders()
 
-    # ------------------------------------------------------
-    # Create database
-    # ------------------------------------------------------
     create_database()
 
     # ------------------------------------------------------
-    # Download today's PDF
+    # Download latest PDF
     # ------------------------------------------------------
+
     pdf_path = download_pdf()
 
     # ------------------------------------------------------
-    # Read complete PDF
+    # Read PDF
     # ------------------------------------------------------
+
     print()
     print("Reading PDF...")
 
     text = read_complete_pdf(pdf_path)
 
     # ------------------------------------------------------
-    # Extract report date
+    # Extract Report Date
     # ------------------------------------------------------
+
     report_date = extract_report_date(text)
 
     print()
-    print("Report Date :", report_date)
-    print()
+    print("=" * 60)
+    print("REPORT INFORMATION")
+    print("=" * 60)
+    print("Current Report Date :", report_date)
+
+    # ------------------------------------------------------
+    # Check last archived report
+    # ------------------------------------------------------
 
     last_report = get_last_report_date()
 
     print("Last Archived Report :", last_report)
 
+    if last_report is not None and last_report == report_date:
+
+        print()
+        print("=" * 60)
+        print("REPORT ALREADY ARCHIVED")
+        print("=" * 60)
+        print("No new report available.")
+        print("Program terminated.")
+
+        return
+
+    print()
+    print("New report detected.")
+    print("Continuing processing...")
+
     # ------------------------------------------------------
-    # Save extracted text
+    # Save raw text
     # ------------------------------------------------------
+
     txt_filename = report_date + ".txt"
 
     txt_path = os.path.join(TEMP_FOLDER, txt_filename)
@@ -189,26 +215,30 @@ def main():
     print(txt_path)
 
     # ------------------------------------------------------
-    # Split text into lines
+    # Split into lines
     # ------------------------------------------------------
+
     lines = split_lines(text)
 
     print()
     print("Total Lines :", len(lines))
 
     # ------------------------------------------------------
-    # Inspect line types
+    # Inspect PDF (Debug)
     # ------------------------------------------------------
+
     inspect_lines(lines)
 
     # ------------------------------------------------------
-    # Extract all records
+    # Parse all records
     # ------------------------------------------------------
+
     records = extract_district_records(lines)
 
     # ------------------------------------------------------
     # Save CSV
     # ------------------------------------------------------
+
     csv_filename = report_date + ".csv"
 
     csv_path = os.path.join(CSV_FOLDER, csv_filename)
@@ -222,6 +252,7 @@ def main():
     # ------------------------------------------------------
     # Update database
     # ------------------------------------------------------
+
     add_log(
         download_date=datetime.now().strftime("%Y-%m-%d"),
         report_date=report_date,
@@ -235,6 +266,7 @@ def main():
     # ------------------------------------------------------
     # Upload to GitHub
     # ------------------------------------------------------
+
     git_update(report_date)
 
     print()
@@ -246,5 +278,6 @@ def main():
 # ==========================================================
 # Program Entry
 # ==========================================================
+
 if __name__ == "__main__":
     main()
