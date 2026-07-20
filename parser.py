@@ -174,14 +174,12 @@ def inspect_lines(lines):
 # ==========================================================
 def extract_district_records(lines):
 
-    print()
-    print("=" * 60)
-    print("DISTRICT RECORD EXTRACTION")
-    print("=" * 60)
-
+    
     current_state = ""
 
     records = []
+    state_count = 0
+    district_count = 0
 
     for line in lines:
 
@@ -241,15 +239,9 @@ def extract_district_records(lines):
                 }
 
                 records.append(state_record)
+                state_count += 1
 
-                print()
-                print("=" * 60)
-                print("STATE SUMMARY")
-                print("=" * 60)
-
-                for key, value in state_record.items():
-                    print(f"{key:18} : {value}")
-
+               
             continue
 
         # --------------------------------------------------
@@ -286,14 +278,21 @@ def extract_district_records(lines):
             }
 
             records.append(district_record)
+            district_count += 1
 
-            print()
-            print("-" * 60)
-            print("DISTRICT RECORD")
-            print("-" * 60)
+            
 
-            for key, value in district_record.items():
-                print(f"{key:18} : {value}")
+    print()
+
+    print("=" * 60)
+    print("PARSING SUMMARY")
+    print("=" * 60)
+
+    print(f"States Parsed     : {state_count}")
+    print(f"Districts Parsed  : {district_count}")
+    print(f"Total Records     : {len(records)}")
+
+    print()
 
     return records
 
