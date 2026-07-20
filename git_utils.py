@@ -2,8 +2,13 @@ import subprocess
 
 
 # ==========================================================
+import subprocess
+
+
+# ==========================================================
 # Run Git Command
 # ==========================================================
+
 def run_git(command):
 
     result = subprocess.run(
@@ -21,10 +26,10 @@ def run_git(command):
 
     return result.returncode
 
-
 # ==========================================================
 # Git Add
 # ==========================================================
+
 def git_add():
 
     print()
@@ -32,12 +37,17 @@ def git_add():
     print("GIT ADD")
     print("=" * 60)
 
-    run_git("git add .")
+    status = run_git("git add .")
 
+    if status != 0:
+        raise Exception("Git Add Failed.")
+    
 
+# ==========================================================
 # ==========================================================
 # Git Commit
 # ==========================================================
+
 def git_commit(message):
 
     print()
@@ -45,12 +55,17 @@ def git_commit(message):
     print("GIT COMMIT")
     print("=" * 60)
 
-    return run_git(f'git commit -m "{message}"')
+    status = run_git(f'git commit -m "{message}"')
+
+    if status != 0:
+        raise Exception("Git Commit Failed.")
 
 
+# ==========================================================
 # ==========================================================
 # Git Push
 # ==========================================================
+
 def git_push():
 
     print()
@@ -58,8 +73,10 @@ def git_push():
     print("GIT PUSH")
     print("=" * 60)
 
-    run_git("git push origin main")
+    status = run_git("git push origin main")
 
+    if status != 0:
+        raise Exception("Git Push Failed.")
 
 # ==========================================================
 # Complete Git Update

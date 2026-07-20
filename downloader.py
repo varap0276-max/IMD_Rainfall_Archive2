@@ -4,6 +4,8 @@ from git_utils import git_update
 from datetime import datetime
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import time 
+
 
 from config import *
 
@@ -54,6 +56,7 @@ def validate_pdf(response):
         raise Exception("Invalid PDF file.")
     
 # ==========================================================
+# ==========================================================
 # Get Latest PDF URL from IMD Website
 # ==========================================================
 
@@ -64,19 +67,27 @@ def get_latest_pdf_url():
     print("LOCATING LATEST PDF")
     print("=" * 60)
 
-    response = requests.get(IMD_PAGE_URL)
+    try:
+        response = requests.get(IMD_PAGE_URL, timeout=30)
+        response.raise_for_status()
 
-    if response.status_code != 200:
-        raise Exception("Unable to open IMD webpage.")
+    except requests.exceptions.RequestException as error:
+        raise Exception(f"Unable to connect to IMD website.\n{error}")
 
     soup = BeautifulSoup(response.text, "html.parser")
 
     pdf_button = soup.find("a", id="default-block-btn")
 
     if pdf_button is None:
-        raise Exception("Download button not found.")
+        raise Exception(
+            "Download button not found.\n"
+            "The IMD webpage layout may have changed."
+        )
 
     pdf_href = pdf_button.get("href")
+
+    if not pdf_href:
+        raise Exception("Download link is empty.")
 
     pdf_url = urljoin(IMD_PAGE_URL, pdf_href)
 
@@ -85,20 +96,24 @@ def get_latest_pdf_url():
 
     return pdf_url
 
-
+# ==========================================================
 # ==========================================================
 # Download PDF
 # ==========================================================
 
 def download_pdf():
 
-    print("\nConnecting to IMD...")
+    print()
+    print("Connecting to IMD...")
 
     pdf_url = get_latest_pdf_url()
 
-    response = requests.get(pdf_url)
+    try:
+        response = requests.get(pdf_url, timeout=60)
+        response.raise_for_status()
 
-    response.raise_for_status()
+    except requests.exceptions.RequestException as error:
+        raise Exception(f"PDF download failed.\n{error}")
 
     validate_pdf(response)
 
@@ -112,62 +127,58 @@ def download_pdf():
 
     if os.path.exists(pdf_path):
 
-        print("\nToday's PDF already exists.")
+        print()
+        print("Today's PDF already exists.")
 
         return pdf_path
 
-    print("\nDownloading PDF...")
+    print()
+    print("Downloading PDF...")
 
     with open(pdf_path, "wb") as file:
-
         file.write(response.content)
 
     print("Download Complete.")
 
     return pdf_path
 
-
 # ==========================================================
 # ==========================================================
 # Main
 # ==========================================================
-# Main
-# ==========================================================
-
 def main():
-
+    start_time = time.time()
     print()
     print("=" * 60)
     print("IMD DAILY RAINFALL ARCHIVER")
     print("=" * 60)
 
     # ------------------------------------------------------
-    # Create folders and database
+    # Create project folders
     # ------------------------------------------------------
-
     create_project_folders()
 
+    # ------------------------------------------------------
+    # Create database
+    # ------------------------------------------------------
     create_database()
 
     # ------------------------------------------------------
     # Download latest PDF
     # ------------------------------------------------------
-
     pdf_path = download_pdf()
 
     # ------------------------------------------------------
-    # Read PDF
+    # Read complete PDF
     # ------------------------------------------------------
-
     print()
     print("Reading PDF...")
 
     text = read_complete_pdf(pdf_path)
 
     # ------------------------------------------------------
-    # Extract Report Date
+    # Extract report date
     # ------------------------------------------------------
-
     report_date = extract_report_date(text)
 
     print()
@@ -177,13 +188,15 @@ def main():
     print("Current Report Date :", report_date)
 
     # ------------------------------------------------------
-    # Check last archived report
+    # Get last archived report
     # ------------------------------------------------------
-
     last_report = get_last_report_date()
 
     print("Last Archived Report :", last_report)
 
+    # ------------------------------------------------------
+    # Check whether report already exists
+    # ------------------------------------------------------
     if last_report is not None and last_report == report_date:
 
         print()
@@ -202,7 +215,6 @@ def main():
     # ------------------------------------------------------
     # Save raw text
     # ------------------------------------------------------
-
     txt_filename = report_date + ".txt"
 
     txt_path = os.path.join(TEMP_FOLDER, txt_filename)
@@ -215,30 +227,26 @@ def main():
     print(txt_path)
 
     # ------------------------------------------------------
-    # Split into lines
+    # Split text into lines
     # ------------------------------------------------------
-
     lines = split_lines(text)
 
     print()
     print("Total Lines :", len(lines))
 
     # ------------------------------------------------------
-    # Inspect PDF (Debug)
+    # Inspect line types
     # ------------------------------------------------------
-
     inspect_lines(lines)
 
     # ------------------------------------------------------
-    # Parse all records
+    # Extract records
     # ------------------------------------------------------
-
     records = extract_district_records(lines)
 
     # ------------------------------------------------------
     # Save CSV
     # ------------------------------------------------------
-
     csv_filename = report_date + ".csv"
 
     csv_path = os.path.join(CSV_FOLDER, csv_filename)
@@ -252,7 +260,6 @@ def main():
     # ------------------------------------------------------
     # Update database
     # ------------------------------------------------------
-
     add_log(
         download_date=datetime.now().strftime("%Y-%m-%d"),
         report_date=report_date,
@@ -266,14 +273,15 @@ def main():
     # ------------------------------------------------------
     # Upload to GitHub
     # ------------------------------------------------------
-
     git_update(report_date)
+    execution_time = time.time() - start_time
+
 
     print()
     print("=" * 60)
     print("PROGRAM COMPLETED SUCCESSFULLY")
+    print(f"Execution Time : {execution_time:.2f} seconds")
     print("=" * 60)
-
 
 # ==========================================================
 # Program Entry
