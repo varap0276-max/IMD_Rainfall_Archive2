@@ -16,10 +16,15 @@ jobs:
     steps:
 
       - name: Checkout Repository
-        uses: actions/checkout@v4
+  uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+- name: Configure Git
+  run: |
+    git config --global user.name "varap0276-max"
+    git config --global user.email "varap0276@gmail.com"
+
+- name: Setup Python
+  uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
