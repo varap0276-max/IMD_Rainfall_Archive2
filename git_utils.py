@@ -1,10 +1,5 @@
 import subprocess
 
-
-# ==========================================================
-import subprocess
-
-
 # ==========================================================
 # Run Git Command
 # ==========================================================
@@ -26,6 +21,7 @@ def run_git(command):
 
     return result.returncode
 
+
 # ==========================================================
 # Git Add
 # ==========================================================
@@ -41,9 +37,10 @@ def git_add():
 
     if status != 0:
         raise Exception("Git Add Failed.")
-    
 
-# ==========================================================
+    return status
+
+
 # ==========================================================
 # Git Commit
 # ==========================================================
@@ -60,8 +57,9 @@ def git_commit(message):
     if status != 0:
         raise Exception("Git Commit Failed.")
 
+    return status
 
-# ==========================================================
+
 # ==========================================================
 # Git Push
 # ==========================================================
@@ -78,18 +76,17 @@ def git_push():
     if status != 0:
         raise Exception("Git Push Failed.")
 
+    return status
+
+
 # ==========================================================
 # Complete Git Update
 # ==========================================================
+
 def git_update(report_date):
 
     git_add()
 
-    status = git_commit(f"Daily IMD Update - {report_date}")
+    git_commit(f"Daily IMD Update - {report_date}")
 
-    if status == 0:
-        git_push()
-
-    else:
-        print()
-        print("No new Git commit created.")
+    git_push()
